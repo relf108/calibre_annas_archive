@@ -1,3 +1,4 @@
+import json
 from contextlib import closing
 from http.client import RemoteDisconnected
 from math import ceil
@@ -90,11 +91,10 @@ class AnnasArchiveStore(StorePlugin):
     def open(self, parent=None, detail_item=None, external=False):
         if detail_item:
             url = self._get_url(detail_item)
+        elif self.working_mirror is not None:
+            url = self.working_mirror
         else:
-            if self.working_mirror is not None:
-                url = self.working_mirror
-            else:
-                url = self.config.get('mirrors', DEFAULT_MIRRORS)[0]
+            url = self.config.get('mirrors', DEFAULT_MIRRORS)[0]
         if external or self.config.get('open_external', False):
             open_url(QUrl(url))
         else:
@@ -110,8 +110,17 @@ class AnnasArchiveStore(StorePlugin):
         _format = '.' + search_result.formats.lower()
 
         link_opts = self.config.get('link', {})
+
         url_extension = link_opts.get('url_extension', True)
         content_type = link_opts.get('content_type', False)
+
+
+        if self.config.get('secret'):
+            resp = urlopen(self._get_url_premium(search_result.detail_item), timeout=timeout).read().decode('utf-8')
+            url = json.loads(resp).get("download_url")
+
+            if url:
+                search_result.downloads[f"premium.{search_result.formats}"] = url
 
         br = browser()
         with closing(br.open(self._get_url(search_result.detail_item), timeout=timeout)) as f:
@@ -188,6 +197,10 @@ class AnnasArchiveStore(StorePlugin):
 
     def _get_url(self, md5):
         return f"{self.working_mirror}/md5/{md5}"
+
+    def _get_url_premium(self, md5):
+        secret = self.config.get('secret')
+        return f"{self.working_mirror}/dyn/api/fast_download.json?md5={md5}&key={secret}"
 
     def config_widget(self):
         from calibre_plugins.store_annas_archive.config import ConfigWidget

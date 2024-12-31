@@ -1,18 +1,59 @@
 from typing import Dict
 
-from calibre_plugins.store_annas_archive.constants import (DEFAULT_MIRRORS, SearchConfiguration, Order, Content, Access,
-                                                           FileType, Source, Language)
+from calibre_plugins.store_annas_archive.constants import (
+    DEFAULT_MIRRORS,
+    Access,
+    Content,
+    FileType,
+    Language,
+    Order,
+    SearchConfiguration,
+    Source,
+)
 
 try:
-    from qt.core import (Qt, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QLabel, QFrame, QGroupBox, QScrollArea,
-                         QAbstractScrollArea, QComboBox, QCheckBox, QSizePolicy, QListWidget, QListWidgetItem,
-                         QAbstractItemView, QShortcut, QKeySequence)
+    from qt.core import (
+        QAbstractItemView,
+        QAbstractScrollArea,
+        QCheckBox,
+        QComboBox,
+        QFrame,
+        QGridLayout,
+        QGroupBox,
+        QHBoxLayout,
+        QKeySequence,
+        QLabel,
+        QLineEdit,
+        QListWidget,
+        QListWidgetItem,
+        QScrollArea,
+        QShortcut,
+        QSizePolicy,
+        Qt,
+        QVBoxLayout,
+        QWidget,
+    )
 except (ImportError, ModuleNotFoundError):
     from PyQt5.QtCore import Qt
-    from PyQt5.QtWidgets import (QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QLabel, QFrame, QGroupBox, QScrollArea,
-                                 QAbstractScrollArea, QComboBox, QCheckBox, QSizePolicy, QListWidget, QListWidgetItem,
-                                 QAbstractItemView, QShortcut)
     from PyQt5.QtGui import QKeySequence
+    from PyQt5.QtWidgets import (
+        QAbstractItemView,
+        QAbstractScrollArea,
+        QCheckBox,
+        QComboBox,
+        QFrame,
+        QGridLayout,
+        QGroupBox,
+        QHBoxLayout,
+        QLabel,
+        QListWidget,
+        QListWidgetItem,
+        QScrollArea,
+        QShortcut,
+        QSizePolicy,
+        QVBoxLayout,
+        QWidget,
+    )
 
 load_translations()
 
@@ -121,6 +162,15 @@ class ConfigWidget(QWidget):
         layout.addWidget(self.mirrors)
         horizontal_layout.addWidget(mirrors)
 
+
+        secret = QGroupBox(_('Secret'), self)
+        secret_layout = QVBoxLayout(secret)
+        secret_layout .setContentsMargins(1, 1, 1, 1)
+        self.secret = QLineEdit(_('Secret'), secret)
+        self.secret.setToolTip(_('Annas archive secret key'))
+        secret_layout.addWidget(self.secret)
+        horizontal_layout.addWidget(secret)
+
         main_layout.addLayout(horizontal_layout)
 
         self.open_external = QCheckBox(_('Open store in external web browser'), self)
@@ -176,6 +226,7 @@ class ConfigWidget(QWidget):
         link_opts = config.get('link', {})
         self.url_extension.setChecked(link_opts.get('url_extension', True))
         self.content_type.setChecked(link_opts.get('content_type', False))
+        self.secret.setText(config.get('secret', ''))
 
     def save_settings(self):
         self.store.config['open_external'] = self.open_external.isChecked()
@@ -189,3 +240,4 @@ class ConfigWidget(QWidget):
             'url_extension': self.url_extension.isChecked(),
             'content_type': self.content_type.isChecked()
         }
+        self.store.config['secret'] = self.secret.text()
