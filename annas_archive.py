@@ -12,7 +12,11 @@ from calibre.gui2 import open_url
 from calibre.gui2.store import StorePlugin
 from calibre.gui2.store.search_result import SearchResult
 from calibre.gui2.store.web_store_dialog import WebStoreDialog
-from calibre_plugins.store_annas_archive.constants import DEFAULT_MIRRORS, RESULTS_PER_PAGE, SearchOption
+from calibre_plugins.store_annas_archive.constants import (
+    DEFAULT_MIRRORS,
+    RESULTS_PER_PAGE,
+    SearchOption,
+)
 from lxml import html
 
 try:
@@ -39,7 +43,9 @@ class AnnasArchiveStore(StorePlugin):
                 mirrors.remove(self.working_mirror)
                 mirrors.insert(0, self.working_mirror)
             for mirror in mirrors:
-                with closing(br.open(url.format(base=mirror, page=page), timeout=timeout)) as resp:
+                with closing(
+                    br.open(url.format(base=mirror, page=page), timeout=timeout)
+                ) as resp:
                     if resp.code < 500 or resp.code > 599:
                         self.working_mirror = mirror
                         doc = html.fromstring(resp.read())
@@ -114,14 +120,22 @@ class AnnasArchiveStore(StorePlugin):
         content_type = link_opts.get("content_type", False)
 
         if self.config.get("secret"):
-            resp = urlopen(self._get_url_premium(search_result.detail_item), timeout=timeout).read().decode("utf-8")
+            resp = (
+                urlopen(
+                    self._get_url_premium(search_result.detail_item), timeout=timeout
+                )
+                .read()
+                .decode("utf-8")
+            )
             url = json.loads(resp).get("download_url")
 
             if url:
                 search_result.downloads[f"premium.{search_result.formats}"] = url
 
         br = browser()
-        with closing(br.open(self._get_url(search_result.detail_item), timeout=timeout)) as f:
+        with closing(
+            br.open(self._get_url(search_result.detail_item), timeout=timeout)
+        ) as f:
             doc = html.fromstring(f.read())
 
         for link in doc.xpath(
@@ -132,7 +146,9 @@ class AnnasArchiveStore(StorePlugin):
 
             if link_text == "Libgen.li":
                 url = self._get_libgen_link(url, br)
-            elif link_text == "Libgen.rs Fiction" or link_text == "Libgen.rs Non-Fiction":
+            elif (
+                link_text == "Libgen.rs Fiction" or link_text == "Libgen.rs Non-Fiction"
+            ):
                 url = self._get_libgen_nonfiction_link(url, br)
             elif link_text.startswith("Sci-Hub"):
                 url = self._get_scihub_link(url, br)
@@ -200,7 +216,9 @@ class AnnasArchiveStore(StorePlugin):
 
     def _get_url_premium(self, md5):
         secret = self.config.get("secret")
-        return f"{self.working_mirror}/dyn/api/fast_download.json?md5={md5}&key={secret}"
+        return (
+            f"{self.working_mirror}/dyn/api/fast_download.json?md5={md5}&key={secret}"
+        )
 
     def config_widget(self):
         from calibre_plugins.store_annas_archive.config import ConfigWidget
