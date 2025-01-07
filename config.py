@@ -1,4 +1,3 @@
-
 from calibre_plugins.store_annas_archive.constants import (
     DEFAULT_MIRRORS,
     Access,
@@ -83,15 +82,24 @@ class MirrorsList(QListWidget):
 
     def _add_last_list_item(self):
         item = QListWidgetItem("", self)
-        item.setFlags(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEditable | Qt.ItemFlag.ItemIsEnabled)
+        item.setFlags(
+            Qt.ItemFlag.ItemIsSelectable
+            | Qt.ItemFlag.ItemIsEditable
+            | Qt.ItemFlag.ItemIsEnabled
+        )
 
     def dropEvent(self, event):
         y = event.pos().y()
-        if (self.count() < 5 and y <= (self.count() * 16) - 10) or (self.count() >= 5 and y <= 70):
+        if (self.count() < 5 and y <= (self.count() * 16) - 10) or (
+            self.count() >= 5 and y <= 70
+        ):
             return super().dropEvent(event)
 
     def add_mirror(self, item):
-        if self._check_last_changed and self.count() == self.indexFromItem(item).row() + 1:
+        if (
+            self._check_last_changed
+            and self.count() == self.indexFromItem(item).row() + 1
+        ):
             if item.text():
                 self._check_last_changed = False
                 item.setFlags(item.flags() | Qt.ItemFlag.ItemIsDragEnabled)
@@ -99,10 +107,7 @@ class MirrorsList(QListWidget):
                 self._check_last_changed = True
 
     def get_mirrors(self) -> list:
-        return [
-            item for i in range(self.count())
-            if (item := str(self.item(i).text()))
-        ]
+        return [item for i in range(self.count()) if (item := str(self.item(i).text()))]
 
 
 class ConfigWidget(QWidget):
@@ -114,12 +119,16 @@ class ConfigWidget(QWidget):
         main_layout = QVBoxLayout(self)
 
         search_options = QGroupBox(_("Search options"), self)
-        search_options.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        search_options.setSizePolicy(
+            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred
+        )
         search_grid = QGridLayout(search_options)
         search_grid.setContentsMargins(3, 3, 3, 3)
 
         ordering_label = QLabel(_("Ordering:"), search_options)
-        ordering_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        ordering_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+        )
         search_grid.addWidget(ordering_label, 0, 0)
         order = QComboBox(search_options)
         for txt, value in Order.options:
@@ -128,29 +137,42 @@ class ConfigWidget(QWidget):
         search_grid.addWidget(order, 0, 1)
         self.order = Order(order)
 
-        self.search_options: dict[str, SearchConfiguration] = {self.order.config_option: self.order}
+        self.search_options: dict[str, SearchConfiguration] = {
+            self.order.config_option: self.order
+        }
 
         # TODO: lay the options out better
         search_grid.addWidget(self._make_cbx_group(search_options, Content()), 1, 0)
         search_grid.addWidget(self._make_cbx_group(search_options, FileType()), 2, 0)
         search_grid.addWidget(self._make_cbx_group(search_options, Access()), 1, 1)
         search_grid.addWidget(self._make_cbx_group(search_options, Source()), 2, 1)
-        search_grid.addWidget(self._make_cbx_group(search_options, Language(), scrollbar=True), 1, 2, 2, 1)
+        search_grid.addWidget(
+            self._make_cbx_group(search_options, Language(), scrollbar=True), 1, 2, 2, 1
+        )
 
         main_layout.addWidget(search_options)
 
         horizontal_layout = QHBoxLayout()
 
         link_options = QGroupBox(_("Download link options"), self)
-        link_options.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        link_options.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
         link_layout = QVBoxLayout(link_options)
         link_layout.setContentsMargins(6, 6, 6, 6)
         self.url_extension = QCheckBox(_("Verify url extension"), link_options)
-        self.url_extension.setToolTip(_("Verify that the each download url ends with correct extension for the format"))
+        self.url_extension.setToolTip(
+            _(
+                "Verify that the each download url ends with correct extension for the format"
+            )
+        )
         link_layout.addWidget(self.url_extension)
         self.content_type = QCheckBox(_("Verify Content-Type"), link_options)
-        self.content_type.setToolTip(_(
-            "Get the header of each site and verify that it has an 'application' content type"))
+        self.content_type.setToolTip(
+            _(
+                "Get the header of each site and verify that it has an 'application' content type"
+            )
+        )
         link_layout.addWidget(self.content_type)
         horizontal_layout.addWidget(link_options)
 
@@ -161,10 +183,9 @@ class ConfigWidget(QWidget):
         layout.addWidget(self.mirrors)
         horizontal_layout.addWidget(mirrors)
 
-
         secret = QGroupBox(_("Secret"), self)
         secret_layout = QVBoxLayout(secret)
-        secret_layout .setContentsMargins(1, 1, 1, 1)
+        secret_layout.setContentsMargins(1, 1, 1, 1)
         self.secret = QLineEdit(_("Secret"), secret)
         self.secret.setToolTip(_("Annas archive secret key"))
         secret_layout.addWidget(self.secret)
@@ -177,7 +198,9 @@ class ConfigWidget(QWidget):
 
         self.load_settings()
 
-    def _make_cbx_group(self, parent, option: SearchConfiguration, scrollbar: bool = False):
+    def _make_cbx_group(
+        self, parent, option: SearchConfiguration, scrollbar: bool = False
+    ):
         box = QGroupBox(_(option.name), parent)
         vertical_layout = QVBoxLayout(box)
         if scrollbar:
@@ -185,14 +208,22 @@ class ConfigWidget(QWidget):
             vertical_layout.setContentsMargins(0, 0, 0, 0)
 
             scroll_area = QScrollArea(box)
-            scroll_area.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
+            scroll_area.setSizePolicy(
+                QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred
+            )
             scroll_area.setFrameShape(QFrame.Shape.NoFrame)
-            scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+            scroll_area.setHorizontalScrollBarPolicy(
+                Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+            )
             scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
-            scroll_area.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
+            scroll_area.setSizeAdjustPolicy(
+                QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents
+            )
 
             cbx_parent = QWidget()
-            cbx_parent.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
+            cbx_parent.setSizePolicy(
+                QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred
+            )
             top_vertical = vertical_layout
             vertical_layout = QVBoxLayout(cbx_parent)
         else:
@@ -220,7 +251,9 @@ class ConfigWidget(QWidget):
 
         search_opts = config.get("search", {})
         for configuration in self.search_options.values():
-            configuration.load(search_opts.get(configuration.config_option, configuration.default))
+            configuration.load(
+                search_opts.get(configuration.config_option, configuration.default)
+            )
 
         link_opts = config.get("link", {})
         self.url_extension.setChecked(link_opts.get("url_extension", True))
