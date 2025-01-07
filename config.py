@@ -1,4 +1,3 @@
-from typing import Dict
 
 from calibre_plugins.store_annas_archive.constants import (
     DEFAULT_MIRRORS,
@@ -83,7 +82,7 @@ class MirrorsList(QListWidget):
         self._check_last_changed = True
 
     def _add_last_list_item(self):
-        item = QListWidgetItem('', self)
+        item = QListWidgetItem("", self)
         item.setFlags(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEditable | Qt.ItemFlag.ItemIsEnabled)
 
     def dropEvent(self, event):
@@ -114,12 +113,12 @@ class ConfigWidget(QWidget):
 
         main_layout = QVBoxLayout(self)
 
-        search_options = QGroupBox(_('Search options'), self)
+        search_options = QGroupBox(_("Search options"), self)
         search_options.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         search_grid = QGridLayout(search_options)
         search_grid.setContentsMargins(3, 3, 3, 3)
 
-        ordering_label = QLabel(_('Ordering:'), search_options)
+        ordering_label = QLabel(_("Ordering:"), search_options)
         ordering_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         search_grid.addWidget(ordering_label, 0, 0)
         order = QComboBox(search_options)
@@ -129,7 +128,7 @@ class ConfigWidget(QWidget):
         search_grid.addWidget(order, 0, 1)
         self.order = Order(order)
 
-        self.search_options: Dict[str, SearchConfiguration] = {self.order.config_option: self.order}
+        self.search_options: dict[str, SearchConfiguration] = {self.order.config_option: self.order}
 
         # TODO: lay the options out better
         search_grid.addWidget(self._make_cbx_group(search_options, Content()), 1, 0)
@@ -142,20 +141,20 @@ class ConfigWidget(QWidget):
 
         horizontal_layout = QHBoxLayout()
 
-        link_options = QGroupBox(_('Download link options'), self)
+        link_options = QGroupBox(_("Download link options"), self)
         link_options.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         link_layout = QVBoxLayout(link_options)
         link_layout.setContentsMargins(6, 6, 6, 6)
-        self.url_extension = QCheckBox(_('Verify url extension'), link_options)
-        self.url_extension.setToolTip(_('Verify that the each download url ends with correct extension for the format'))
+        self.url_extension = QCheckBox(_("Verify url extension"), link_options)
+        self.url_extension.setToolTip(_("Verify that the each download url ends with correct extension for the format"))
         link_layout.addWidget(self.url_extension)
-        self.content_type = QCheckBox(_('Verify Content-Type'), link_options)
+        self.content_type = QCheckBox(_("Verify Content-Type"), link_options)
         self.content_type.setToolTip(_(
-            'Get the header of each site and verify that it has an \'application\' content type'))
+            "Get the header of each site and verify that it has an 'application' content type"))
         link_layout.addWidget(self.content_type)
         horizontal_layout.addWidget(link_options)
 
-        mirrors = QGroupBox(_('Mirrors'), self)
+        mirrors = QGroupBox(_("Mirrors"), self)
         layout = QVBoxLayout(mirrors)
         layout.setContentsMargins(1, 1, 1, 1)
         self.mirrors = MirrorsList(mirrors)
@@ -163,17 +162,17 @@ class ConfigWidget(QWidget):
         horizontal_layout.addWidget(mirrors)
 
 
-        secret = QGroupBox(_('Secret'), self)
+        secret = QGroupBox(_("Secret"), self)
         secret_layout = QVBoxLayout(secret)
         secret_layout .setContentsMargins(1, 1, 1, 1)
-        self.secret = QLineEdit(_('Secret'), secret)
-        self.secret.setToolTip(_('Annas archive secret key'))
+        self.secret = QLineEdit(_("Secret"), secret)
+        self.secret.setToolTip(_("Annas archive secret key"))
         secret_layout.addWidget(self.secret)
         horizontal_layout.addWidget(secret)
 
         main_layout.addLayout(horizontal_layout)
 
-        self.open_external = QCheckBox(_('Open store in external web browser'), self)
+        self.open_external = QCheckBox(_("Open store in external web browser"), self)
         main_layout.addWidget(self.open_external)
 
         self.load_settings()
@@ -216,28 +215,28 @@ class ConfigWidget(QWidget):
     def load_settings(self):
         config = self.store.config
 
-        self.open_external.setChecked(config.get('open_external', False))
-        self.mirrors.load_mirrors(config.get('mirrors', DEFAULT_MIRRORS))
+        self.open_external.setChecked(config.get("open_external", False))
+        self.mirrors.load_mirrors(config.get("mirrors", DEFAULT_MIRRORS))
 
-        search_opts = config.get('search', {})
+        search_opts = config.get("search", {})
         for configuration in self.search_options.values():
             configuration.load(search_opts.get(configuration.config_option, configuration.default))
 
-        link_opts = config.get('link', {})
-        self.url_extension.setChecked(link_opts.get('url_extension', True))
-        self.content_type.setChecked(link_opts.get('content_type', False))
-        self.secret.setText(config.get('secret', ''))
+        link_opts = config.get("link", {})
+        self.url_extension.setChecked(link_opts.get("url_extension", True))
+        self.content_type.setChecked(link_opts.get("content_type", False))
+        self.secret.setText(config.get("secret", ""))
 
     def save_settings(self):
-        self.store.config['open_external'] = self.open_external.isChecked()
-        self.store.config['mirrors'] = self.mirrors.get_mirrors()
+        self.store.config["open_external"] = self.open_external.isChecked()
+        self.store.config["mirrors"] = self.mirrors.get_mirrors()
 
-        self.store.config['search'] = {
+        self.store.config["search"] = {
             configuration.config_option: configuration.to_save()
             for configuration in self.search_options.values()
         }
-        self.store.config['link'] = {
-            'url_extension': self.url_extension.isChecked(),
-            'content_type': self.content_type.isChecked()
+        self.store.config["link"] = {
+            "url_extension": self.url_extension.isChecked(),
+            "content_type": self.content_type.isChecked(),
         }
-        self.store.config['secret'] = self.secret.text()
+        self.store.config["secret"] = self.secret.text()
